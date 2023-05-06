@@ -32,7 +32,7 @@ function runFixture(pFixture, pParser = "acorn") {
 
   it(`${pFixture.title} (with '${pParser}' as parser)`, async () => {
     expect(
-      getDependencies(
+      await getDependencies(
         pFixture.input.fileName,
         normalizeCruiseOptions(lOptions),
         await normalizeResolveOptions(
@@ -78,7 +78,7 @@ describe("[I] extract/getDependencies - CommonJS - with bangs", () => {
     );
 
     expect(
-      getDependencies(
+      await getDependencies(
         "test/extract/__mocks__/cjs-bangs/index.js",
         lOptions,
         lResolveOptions
@@ -107,7 +107,7 @@ describe("[I] extract/getDependencies - CommonJS - with bangs", () => {
     );
 
     expect(
-      getDependencies(
+      await getDependencies(
         "test/extract/__mocks__/cjs-multi-bangs/index.js",
         lOptions,
         lResolveOptions

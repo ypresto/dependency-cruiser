@@ -26,8 +26,8 @@ function needsJSXTreatment(pFileRecord, pTranspileOptions) {
   );
 }
 
-export function getASTFromSource(pFileRecord, pTranspileOptions) {
-  const lJavaScriptSource = transpile(pFileRecord, pTranspileOptions);
+export async function getASTFromSource(pFileRecord, pTranspileOptions) {
+  const lJavaScriptSource = await transpile(pFileRecord, pTranspileOptions);
 
   try {
     if (needsJSXTreatment(pFileRecord, pTranspileOptions)) {
@@ -57,10 +57,10 @@ export function getASTFromSource(pFileRecord, pTranspileOptions) {
  *
  * If parsing fails we fall back to acorn's 'loose' parser
  *
- * @param {string} pFileName      path to the file to be parsed
- * @param {any} pTranspileOptions options for the transpiler(s) - a tsconfig or
- *                                a babel config
- * @returns {acorn.Node}              the abstract syntax tree
+ * @param {string} pFileName        path to the file to be parsed
+ * @param {any} pTranspileOptions   options for the transpiler(s) - a tsconfig or
+ *                                  a babel config
+ * @returns {Promise<acorn.Node>}   the abstract syntax tree
  */
 function getAST(pFileName, pTranspileOptions) {
   return getASTFromSource(
@@ -80,7 +80,7 @@ function getAST(pFileName, pTranspileOptions) {
  *
  * @param {string} pFileName - the name of the file to compile
  * @param {any} pTranspileOptions - options for the transpiler(s) - typically a tsconfig or a babel config
- * @return {acorn.Node} - a (javascript) AST
+ * @return {Promise<acorn.Node>} - a (javascript) AST
  */
 export const getASTCached = memoize(
   getAST,

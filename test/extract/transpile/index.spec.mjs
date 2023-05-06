@@ -15,22 +15,22 @@ import vueTemplateWrap from "../../../src/extract/transpile/vue-template-wrap.cj
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 describe("[I] transpile", () => {
-  it("As the 'livescript' transpiler is not available, returns the original source", () => {
+  it("As the 'livescript' transpiler is not available, returns the original source", async () => {
     expect(
-      transpile({ extension: ".ls", source: "whatever the bever" })
+      await transpile({ extension: ".ls", source: "whatever the bever" })
     ).to.equal("whatever the bever");
   });
 
-  it("As the 'bf-script' transpiler is not supported at all, returns the original source", () => {
+  it("As the 'bf-script' transpiler is not supported at all, returns the original source", async () => {
     expect(
-      transpile({
+      await transpile({
         extension: ".bfs",
         source: "'brane-fuchs-skrybd'|#$'nicht unterstutzt'|^^^",
       })
     ).to.equal("'brane-fuchs-skrybd'|#$'nicht unterstutzt'|^^^");
   });
 
-  it("Returns svelte compiled down to js", () => {
+  it("Returns svelte compiled down to js", async () => {
     const lInput = readFileSync(
       join(__dirname, "__mocks__", "svelte-ts.svelte"),
       "utf8"
@@ -40,11 +40,11 @@ describe("[I] transpile", () => {
     );
 
     expect(
-      normalizeSource(transpile({ extension: ".svelte", source: lInput }))
+      normalizeSource(await transpile({ extension: ".svelte", source: lInput }))
     ).to.equal(lExpectedOoutput);
   });
 
-  it("Does not confuse .ts for .tsx", () => {
+  it("Does not confuse .ts for .tsx", async () => {
     const lInputFixture = readFileSync(
       join(__dirname, "__mocks__/dontconfuse_ts_for_tsx/input/Observable.ts"),
       "utf8"
@@ -58,11 +58,13 @@ describe("[I] transpile", () => {
     );
 
     expect(
-      normalizeSource(transpile({ extension: ".ts", source: lInputFixture }))
+      normalizeSource(
+        await transpile({ extension: ".ts", source: lInputFixture })
+      )
     ).to.equal(normalizeSource(lTranspiledFixture));
   });
 
-  it("Takes a tsconfig and takes that into account on transpilation", () => {
+  it("Takes a tsconfig and takes that into account on transpilation", async () => {
     const lInputFixture = readFileSync(
       join(__dirname, "__mocks__/dontconfuse_ts_for_tsx/input/Observable.ts"),
       "utf8"
@@ -86,7 +88,7 @@ describe("[I] transpile", () => {
     };
     expect(
       normalizeSource(
-        transpile(
+        await transpile(
           { extension: ".ts", source: lInputFixture },
           lTranspilerOptions
         )

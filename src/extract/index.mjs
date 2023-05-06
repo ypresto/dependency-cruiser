@@ -5,7 +5,8 @@ import gatherInitialSources from "./gather-initial-sources.mjs";
 import clearCaches from "./clear-caches.mjs";
 
 /* eslint max-params:0 */
-function extractRecursive(
+
+async function extractRecursive(
   pFileName,
   pCruiseOptions,
   pVisited,
@@ -16,7 +17,7 @@ function extractRecursive(
   pVisited.add(pFileName);
   const lDependencies =
     pCruiseOptions.maxDepth <= 0 || pDepth < pCruiseOptions.maxDepth
-      ? getDependencies(
+      ? await getDependencies(
           pFileName,
           pCruiseOptions,
           pResolveOptions,
@@ -24,36 +25,36 @@ function extractRecursive(
         )
       : [];
 
-  return lDependencies
-    .filter(
-      ({ followable, matchesDoNotFollow }) => followable && !matchesDoNotFollow
-    )
-    .reduce(
-      (pAll, { resolved }) => {
-        if (!pVisited.has(resolved)) {
-          return pAll.concat(
-            extractRecursive(
-              resolved,
-              pCruiseOptions,
-              pVisited,
-              pDepth + 1,
-              pResolveOptions,
-              pTranspileOptions
-            )
-          );
-        }
-        return pAll;
-      },
-      [
-        {
-          source: pFileName,
-          dependencies: lDependencies,
-        },
-      ]
-    );
+  const lFilteredDependencies = lDependencies.filter(
+    ({ followable, matchesDoNotFollow }) => followable && !matchesDoNotFollow
+  );
+
+  let lReturnValue = [
+    {
+      source: pFileName,
+      dependencies: lDependencies,
+    },
+  ];
+  // eslint-disable-next-line budapestian/local-variable-pattern
+  for (let { resolved } of lFilteredDependencies) {
+    if (!pVisited.has(resolved)) {
+      lReturnValue = lReturnValue.concat(
+        // eslint-disable-next-line no-await-in-loop
+        await extractRecursive(
+          resolved,
+          pCruiseOptions,
+          pVisited,
+          pDepth + 1,
+          pResolveOptions,
+          pTranspileOptions
+        )
+      );
+    }
+  }
+  return lReturnValue;
 }
 
-function extractFileDirectoryArray(
+async function extractFileDirectoryArray(
   pFileDirectoryArray,
   pCruiseOptions,
   pResolveOptions,
@@ -68,12 +69,15 @@ function extractFileDirectoryArray(
   );
 
   bus.info("reading files: visiting dependencies");
-  return lInitialSources.reduce((pDependencies, pFilename) => {
-    if (!lVisited.has(pFilename)) {
-      lVisited.add(pFilename);
-      return pDependencies.concat(
-        extractRecursive(
-          pFilename,
+  let lReturnValue = [];
+
+  for (let lFileName of lInitialSources) {
+    if (!lVisited.has(lFileName)) {
+      lVisited.add(lFileName);
+      lReturnValue = lReturnValue.concat(
+        // eslint-disable-next-line no-await-in-loop
+        await extractRecursive(
+          lFileName,
           pCruiseOptions,
           lVisited,
           0,
@@ -82,8 +86,8 @@ function extractFileDirectoryArray(
         )
       );
     }
-    return pDependencies;
-  }, []);
+  }
+  return lReturnValue;
 }
 
 function isNotFollowable({ followable }) {
@@ -137,20 +141,20 @@ function filterExcludedDynamicDependencies(pModule, pExclude) {
  * @param {import("../../types/dependency-cruiser.js").ITranspileOptions} pTranspileOptions
  * @returns {Partial<import("../../types/dependency-cruiser.js").IModule[]>}
  */
-export default function extract(
+export default async function extract(
   pFileDirectoryArray,
   pCruiseOptions,
   pResolveOptions,
   pTranspileOptions
 ) {
   clearCaches();
-
-  const lReturnValue = extractFileDirectoryArray(
+  const lThings = await extractFileDirectoryArray(
     pFileDirectoryArray,
     pCruiseOptions,
     pResolveOptions,
     pTranspileOptions
-  )
+  );
+  const lReturnValue = lThings
     .reduce(complete, [])
     .map((pModule) =>
       filterExcludedDynamicDependencies(pModule, pCruiseOptions.exclude)

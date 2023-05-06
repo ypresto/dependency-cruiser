@@ -22,7 +22,7 @@ describe("[I] extract/index - max depth", () => {
         },
         lOptions
       );
-      const lResult = extract(
+      const lResult = await extract(
         ["./test/extract/__mocks__/maxDepth/index.js"],
         lOptions,
         lResolveOptions

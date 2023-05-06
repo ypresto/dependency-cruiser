@@ -2,23 +2,23 @@ import { expect } from "chai";
 import extractcommonJSDeps from "../../../src/extract/ast-extractors/extract-cjs-deps.mjs";
 import { getASTFromSource } from "../../../src/extract/parse/to-javascript-ast.mjs";
 
-const extractcommonJS = (
+const extractcommonJS = async (
   pJavaScriptSource,
   pDependencies,
   pExoticRequireStrings = []
 ) =>
   extractcommonJSDeps(
-    getASTFromSource({ source: pJavaScriptSource, extension: ".js" }),
+    await getASTFromSource({ source: pJavaScriptSource, extension: ".js" }),
     pDependencies,
     "cjs",
     pExoticRequireStrings
   );
 
 describe("[U] ast-extractors/extract-cjs-deps", () => {
-  it("require with in an assignment", () => {
+  it("require with in an assignment", async () => {
     let lDeps = [];
 
-    extractcommonJS("const x = require('./static')", lDeps);
+    await extractcommonJS("const x = require('./static')", lDeps);
     expect(lDeps).to.deep.equal([
       {
         module: "./static",
@@ -29,10 +29,10 @@ describe("[U] ast-extractors/extract-cjs-deps", () => {
     ]);
   });
 
-  it("use an exotic require and specify it as exoticRequireString", () => {
+  it("use an exotic require and specify it as exoticRequireString", async () => {
     let lDeps = [];
 
-    extractcommonJS(
+    await extractcommonJS(
       "const need = require; const x = need('./static-required-with-need')",
       lDeps,
       ["need"]
@@ -48,10 +48,10 @@ describe("[U] ast-extractors/extract-cjs-deps", () => {
     ]);
   });
 
-  it("use an exotic combined require and specify it as exoticRequireString", () => {
+  it("use an exotic combined require and specify it as exoticRequireString", async () => {
     let lDeps = [];
 
-    extractcommonJS(
+    await extractcommonJS(
       "const x = window.require('./static-required-with-need')",
       lDeps,
       ["window.require"]
@@ -67,20 +67,20 @@ describe("[U] ast-extractors/extract-cjs-deps", () => {
     ]);
   });
 
-  it("use an exotic require and don't specify it as exoticRequireString", () => {
+  it("use an exotic require and don't specify it as exoticRequireString", async () => {
     let lDeps = [];
 
-    extractcommonJS(
+    await extractcommonJS(
       "const need = require; const x = need('./static-required-with-need')",
       lDeps
     );
     expect(lDeps).to.deep.equal([]);
   });
 
-  it("require with in an assignment - template literal argument", () => {
+  it("require with in an assignment - template literal argument", async () => {
     let lDeps = [];
 
-    extractcommonJS("const x = require(`template-literal`)", lDeps);
+    await extractcommonJS("const x = require(`template-literal`)", lDeps);
     expect(lDeps).to.deep.equal([
       {
         module: "template-literal",
@@ -91,17 +91,17 @@ describe("[U] ast-extractors/extract-cjs-deps", () => {
     ]);
   });
 
-  it("non-string argument doesn't yield a dependency (number)", () => {
+  it("non-string argument doesn't yield a dependency (number)", async () => {
     let lDeps = [];
 
-    extractcommonJS("require(42);", lDeps);
+    await extractcommonJS("require(42);", lDeps);
     expect(lDeps).to.deep.equal([]);
   });
 
-  it("non-string argument doesn't yield a dependency (function call)", () => {
+  it("non-string argument doesn't yield a dependency (function call)", async () => {
     let lDeps = [];
 
-    extractcommonJS(
+    await extractcommonJS(
       `
             determineWhatToImport = () => 'bla';
             require(determineWhatToImport());

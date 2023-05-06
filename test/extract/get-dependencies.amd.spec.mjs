@@ -53,7 +53,7 @@ describe("[I] extract/getDependencies - AMD - with bangs", () => {
     );
 
     expect(
-      getDependencies(
+      await getDependencies(
         "test/extract/__mocks__/amd-bangs/root_one.js",
         lOptions,
         lResolveOptions
@@ -69,7 +69,7 @@ describe("[I] extract/getDependencies - AMD - with bangs", () => {
     );
 
     expect(
-      getDependencies(
+      await getDependencies(
         "test/extract/__mocks__/amd-bangs/simplified-commonjs-wrapper.js",
         lOptions,
         lResolveOptions

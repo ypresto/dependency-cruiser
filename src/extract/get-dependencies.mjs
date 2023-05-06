@@ -22,13 +22,16 @@ function extractFromSwcAST({ baseDir, exoticRequireStrings }, pFileName) {
   );
 }
 
-function extractFromTypeScriptAST(
+async function extractFromTypeScriptAST(
   { baseDir, exoticRequireStrings },
   pFileName,
   pTranspileOptions
 ) {
   return extractTypeScriptDeps(
-    toTypescriptAST.getASTCached(join(baseDir, pFileName), pTranspileOptions),
+    await toTypescriptAST.getASTCached(
+      join(baseDir, pFileName),
+      pTranspileOptions
+    ),
     exoticRequireStrings
   );
 }
@@ -62,13 +65,13 @@ function shouldUseSwc({ parser }, pFileName) {
   );
 }
 
-function extractFromJavaScriptAST(
+async function extractFromJavaScriptAST(
   { baseDir, moduleSystems, exoticRequireStrings },
   pFileName,
   pTranspileOptions
 ) {
   let lDependencies = [];
-  const lAST = toJavascriptAST.getASTCached(
+  const lAST = await toJavascriptAST.getASTCached(
     join(baseDir, pFileName),
     pTranspileOptions
   );
@@ -92,22 +95,27 @@ function extractWithSwc(pCruiseOptions, pFileName) {
   );
 }
 
-function extractWithTsc(pCruiseOptions, pFileName, pTranspileOptions) {
-  let lDependencies = extractFromTypeScriptAST(
+async function extractWithTsc(pCruiseOptions, pFileName, pTranspileOptions) {
+  const lDependencies = await extractFromTypeScriptAST(
     pCruiseOptions,
     pFileName,
     pTranspileOptions
-  ).filter(({ moduleSystem }) =>
+  );
+  const lFilteredDependencies = lDependencies.filter(({ moduleSystem }) =>
     pCruiseOptions.moduleSystems.includes(moduleSystem)
   );
 
   if (pCruiseOptions.tsPreCompilationDeps === "specify") {
-    lDependencies = detectPreCompilationNess(
-      lDependencies,
-      extractFromJavaScriptAST(pCruiseOptions, pFileName, pTranspileOptions)
+    return detectPreCompilationNess(
+      lFilteredDependencies,
+      await extractFromJavaScriptAST(
+        pCruiseOptions,
+        pFileName,
+        pTranspileOptions
+      )
     );
   }
-  return lDependencies;
+  return lFilteredDependencies;
 }
 
 /**
@@ -117,7 +125,11 @@ function extractWithTsc(pCruiseOptions, pFileName, pTranspileOptions) {
  * @param {any} pTranspileOptions
  * @returns {import('../../types/cruise-result.js').IDependency[]}
  */
-function extractDependencies(pCruiseOptions, pFileName, pTranspileOptions) {
+async function extractDependencies(
+  pCruiseOptions,
+  pFileName,
+  pTranspileOptions
+) {
   /** @type import('../../types/cruise-result.js').IDependency[] */
   let lDependencies = [];
 
@@ -125,13 +137,13 @@ function extractDependencies(pCruiseOptions, pFileName, pTranspileOptions) {
     if (shouldUseSwc(pCruiseOptions, pFileName)) {
       lDependencies = extractWithSwc(pCruiseOptions, pFileName);
     } else if (shouldUseTsc(pCruiseOptions, pFileName)) {
-      lDependencies = extractWithTsc(
+      lDependencies = await extractWithTsc(
         pCruiseOptions,
         pFileName,
         pTranspileOptions
       );
     } else {
-      lDependencies = extractFromJavaScriptAST(
+      lDependencies = await extractFromJavaScriptAST(
         pCruiseOptions,
         pFileName,
         pTranspileOptions
@@ -219,7 +231,7 @@ function compareDeps(pLeft, pRight) {
  *                               'extends' option in there)
  * @return {import("../../types/dependency-cruiser.js").IDependency[]} an array of dependency objects (see above)
  */
-export default function getDependencies(
+export default async function getDependencies(
   pFileName,
   pCruiseOptions,
   pResolveOptions,
@@ -227,7 +239,7 @@ export default function getDependencies(
 ) {
   try {
     return uniqBy(
-      extractDependencies(pCruiseOptions, pFileName, pTranspileOptions),
+      await extractDependencies(pCruiseOptions, pFileName, pTranspileOptions),
       getDependencyUniqueKey
     )
       .sort(compareDeps)

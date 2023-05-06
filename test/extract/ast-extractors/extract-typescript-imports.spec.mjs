@@ -2,9 +2,9 @@ import { expect } from "chai";
 import extractTypescript from "./extract-typescript.utl.mjs";
 
 describe("[U] ast-extractors/extract-typescript - regular imports", () => {
-  it("extracts 'import for side effects only'", () => {
+  it("extracts 'import for side effects only'", async () => {
     expect(
-      extractTypescript("import './import-for-side-effects';")
+      await extractTypescript("import './import-for-side-effects';")
     ).to.deep.equal([
       {
         module: "./import-for-side-effects",
@@ -15,9 +15,9 @@ describe("[U] ast-extractors/extract-typescript - regular imports", () => {
     ]);
   });
 
-  it("extracts 'import some stuff only'", () => {
+  it("extracts 'import some stuff only'", async () => {
     expect(
-      extractTypescript("import { SomeSingleExport } from './ts-thing';")
+      await extractTypescript("import { SomeSingleExport } from './ts-thing';")
     ).to.deep.equal([
       {
         module: "./ts-thing",
@@ -28,9 +28,9 @@ describe("[U] ast-extractors/extract-typescript - regular imports", () => {
     ]);
   });
 
-  it("extracts 'import some stuff only and rename that'", () => {
+  it("extracts 'import some stuff only and rename that'", async () => {
     expect(
-      extractTypescript(
+      await extractTypescript(
         "import { SomeSingleExport as RenamedSingleExport } from './ts-thing';"
       )
     ).to.deep.equal([
@@ -43,9 +43,9 @@ describe("[U] ast-extractors/extract-typescript - regular imports", () => {
     ]);
   });
 
-  it("extracts 'import everything into a variable'", () => {
+  it("extracts 'import everything into a variable'", async () => {
     expect(
-      extractTypescript(
+      await extractTypescript(
         "import * as entireTsOtherThingAsVariable from './ts-thing';"
       )
     ).to.deep.equal([

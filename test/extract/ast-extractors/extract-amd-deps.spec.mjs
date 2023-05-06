@@ -2,22 +2,22 @@ import { expect } from "chai";
 import extractAMDDeps from "../../../src/extract/ast-extractors/extract-amd-deps.mjs";
 import { getASTFromSource } from "../../../src/extract/parse/to-javascript-ast.mjs";
 
-const extractAMD = (
+const extractAMD = async (
   pJavaScriptSource,
   pDependencies,
   pExoticRequireStrings = []
 ) =>
   extractAMDDeps(
-    getASTFromSource({ source: pJavaScriptSource, extension: ".js" }),
+    await getASTFromSource({ source: pJavaScriptSource, extension: ".js" }),
     pDependencies,
     pExoticRequireStrings
   );
 
 describe("[U] ast-extractors/extract-AMD-deps", () => {
-  it("amd define", () => {
+  it("amd define", async () => {
     let lDeps = [];
 
-    extractAMD(
+    await extractAMD(
       `define(["./root_one", "./root_two"], function(root_one){ /* do stuff */ });`,
       lDeps
     );
@@ -37,14 +37,14 @@ describe("[U] ast-extractors/extract-AMD-deps", () => {
     ]);
   });
 
-  it("amd require wrapper", () => {
+  it("amd require wrapper", async () => {
     let lDeps = [];
     const lInput = `define(function(require, exports, module){
       var one = require('./one-with-require'),
           two = require('./two-with-require');
   });`;
 
-    extractAMD(lInput, lDeps);
+    await extractAMD(lInput, lDeps);
     expect(lDeps).to.deep.equal([
       {
         module: "./one-with-require",
@@ -61,14 +61,14 @@ describe("[U] ast-extractors/extract-AMD-deps", () => {
     ]);
   });
 
-  it("amd require wrapper with the require parameter named something else", () => {
+  it("amd require wrapper with the require parameter named something else", async () => {
     let lDeps = [];
     const lInput = `define(function(want, exports, module){
       var one = want('./one-with-want'),
           two = want('./two-with-want');
   });`;
 
-    extractAMD(lInput, lDeps, ["want"]);
+    await extractAMD(lInput, lDeps, ["want"]);
     expect(lDeps).to.deep.equal([
       {
         module: "./one-with-want",

@@ -16,8 +16,8 @@ const TSX_SOURCE = `
     export default Index;
     `;
 describe("[U] extract/parse/to-javascript-ast", () => {
-  it("recogizes 'preserve'd tsx as jsx", () => {
-    const lFoundAST = getASTFromSource(
+  it("recogizes 'preserve'd tsx as jsx", async () => {
+    const lFoundAST = await getASTFromSource(
       {
         source: TSX_SOURCE,
         filename: "./some-page.tsx",
@@ -46,8 +46,8 @@ describe("[U] extract/parse/to-javascript-ast", () => {
     ).to.equal("JSXElement");
   });
 
-  it("doesn't have any weird imports when tsx gets transpiled as non-'preserve' ", () => {
-    const lFoundAST = getASTFromSource(
+  it("doesn't have any weird imports when tsx gets transpiled as non-'preserve' ", async () => {
+    const lFoundAST = await getASTFromSource(
       {
         source: TSX_SOURCE,
         filename: "./some-page.tsx",

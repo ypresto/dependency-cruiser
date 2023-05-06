@@ -2,9 +2,9 @@ import { expect } from "chai";
 import extractTypescript from "./extract-typescript.utl.mjs";
 
 describe("[U] ast-extractors/extract-typescript - triple slash directives", () => {
-  it("path", () => {
+  it("path", async () => {
     expect(
-      extractTypescript('/// <reference path="./ts-thing" />')
+      await extractTypescript('/// <reference path="./ts-thing" />')
     ).to.deep.equal([
       {
         module: "./ts-thing",
@@ -15,9 +15,9 @@ describe("[U] ast-extractors/extract-typescript - triple slash directives", () =
     ]);
   });
 
-  it("types", () => {
+  it("types", async () => {
     expect(
-      extractTypescript('/// <reference types="./ts-thing-types" />')
+      await extractTypescript('/// <reference types="./ts-thing-types" />')
     ).to.deep.equal([
       {
         module: "./ts-thing-types",
@@ -28,9 +28,9 @@ describe("[U] ast-extractors/extract-typescript - triple slash directives", () =
     ]);
   });
 
-  it("amd-dependencies", () => {
+  it("amd-dependencies", async () => {
     expect(
-      extractTypescript('/// <amd-dependency path="./ts-thing-types" />')
+      await extractTypescript('/// <amd-dependency path="./ts-thing-types" />')
     ).to.deep.equal([
       {
         module: "./ts-thing-types",

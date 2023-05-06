@@ -2,9 +2,9 @@ import { expect } from "chai";
 import extractTypescript from "./extract-typescript.utl.mjs";
 
 describe("[U] ast-extractors/extract-typescript - regular commonjs require", () => {
-  it("extracts require of a module that uses an export-equals'", () => {
+  it("extracts require of a module that uses an export-equals'", async () => {
     expect(
-      extractTypescript(
+      await extractTypescript(
         "import thing = require('./thing-that-uses-export-equals');"
       )
     ).to.deep.equal([
@@ -17,9 +17,9 @@ describe("[U] ast-extractors/extract-typescript - regular commonjs require", () 
     ]);
   });
 
-  it("extracts regular require as a const, let or var", () => {
+  it("extracts regular require as a const, let or var", async () => {
     expect(
-      extractTypescript(
+      await extractTypescript(
         `const lala1 = require('legit-one');
                  let lala2 = require('legit-two');
                  var lala3 = require('legit-three');`
@@ -46,9 +46,9 @@ describe("[U] ast-extractors/extract-typescript - regular commonjs require", () 
     ]);
   });
 
-  it("extracts regular requires that are not on the top level in the AST", () => {
+  it("extracts regular requires that are not on the top level in the AST", async () => {
     expect(
-      extractTypescript(
+      await extractTypescript(
         `function f(x) {
                     if(x > 0) {
                         return require('midash')
@@ -84,9 +84,9 @@ describe("[U] ast-extractors/extract-typescript - regular commonjs require", () 
     ]);
   });
 
-  it("extracts regular require with a template string without placeholders", () => {
+  it("extracts regular require with a template string without placeholders", async () => {
     expect(
-      extractTypescript("const lala = require(`thunderscore`)")
+      await extractTypescript("const lala = require(`thunderscore`)")
     ).to.deep.equal([
       {
         module: "thunderscore",
@@ -97,24 +97,26 @@ describe("[U] ast-extractors/extract-typescript - regular commonjs require", () 
     ]);
   });
 
-  it("ignores regular require without parameters", () => {
-    expect(extractTypescript("const lala = require()")).to.deep.equal([]);
+  it("ignores regular require without parameters", async () => {
+    expect(await extractTypescript("const lala = require()")).to.deep.equal([]);
   });
 
-  it("ignores regular require with a non-string argument", () => {
-    expect(extractTypescript("const lala = require(666)")).to.deep.equal([]);
+  it("ignores regular require with a non-string argument", async () => {
+    expect(await extractTypescript("const lala = require(666)")).to.deep.equal(
+      []
+    );
   });
 
-  it("ignores regular require with a template literal with placeholders", () => {
+  it("ignores regular require with a template literal with placeholders", async () => {
     expect(
       // eslint-disable-next-line no-template-curly-in-string
-      extractTypescript("const lala = require(`shwoooop/${blabla}`)")
+      await extractTypescript("const lala = require(`shwoooop/${blabla}`)")
     ).to.deep.equal([]);
   });
 
-  it("ignores regular require with a function for a parameter", () => {
-    expect(extractTypescript("const lala = require(helvete())")).to.deep.equal(
-      []
-    );
+  it("ignores regular require with a function for a parameter", async () => {
+    expect(
+      await extractTypescript("const lala = require(helvete())")
+    ).to.deep.equal([]);
   });
 });

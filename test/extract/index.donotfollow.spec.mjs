@@ -22,7 +22,7 @@ describe("[I] extract/index - do not follow", () => {
       },
       lOptions
     );
-    const lResult = extract(
+    const lResult = await extract(
       ["./test/extract/__mocks__/donotfollow/index.js"],
       lOptions,
       lResolveOptions
@@ -45,7 +45,7 @@ describe("[I] extract/index - do not follow", () => {
       },
       lOptions
     );
-    const lResult = extract(
+    const lResult = await extract(
       ["./test/extract/__mocks__/donotfollow-dependency-types/index.js"],
       lOptions,
       lResolveOptions

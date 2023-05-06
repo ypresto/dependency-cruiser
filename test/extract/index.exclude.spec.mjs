@@ -22,7 +22,7 @@ describe("[I] extract/index - exclude", () => {
       },
       lOptions
     );
-    const lResult = extract(
+    const lResult = await extract(
       ["./test/extract/__mocks__/exclude/path/es/src"],
       lOptions,
       lResolveOptions
@@ -45,7 +45,7 @@ describe("[I] extract/index - exclude", () => {
       },
       lOptions
     );
-    const lResult = extract(
+    const lResult = await extract(
       ["./test/extract/__mocks__/exclude/dynamic/es/src"],
       lOptions,
       lResolveOptions

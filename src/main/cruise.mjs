@@ -81,7 +81,7 @@ export default async function cruise(
   );
 
   bus.summary("reading files", c(6));
-  const lExtractionResult = extract(
+  const lExtractionResult = await extract(
     lNormalizedFileAndDirectoryArray,
     lCruiseOptions,
     lNormalizedResolveOptions,

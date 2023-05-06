@@ -2,17 +2,24 @@ import { expect } from "chai";
 import extractES6Deps from "../../../src/extract/ast-extractors/extract-es6-deps.mjs";
 import { getASTFromSource } from "../../../src/extract/parse/to-javascript-ast.mjs";
 
-const extractES6 = (pJavaScriptSource, pDependencies, pExtension = ".js") =>
+const extractES6 = async (
+  pJavaScriptSource,
+  pDependencies,
+  pExtension = ".js"
+) =>
   extractES6Deps(
-    getASTFromSource({ source: pJavaScriptSource, extension: pExtension }),
+    await getASTFromSource({
+      source: pJavaScriptSource,
+      extension: pExtension,
+    }),
     pDependencies
   );
 
 describe("[U] ast-extractors/extract-ES6-deps", () => {
-  it("dynamic imports of strings", () => {
+  it("dynamic imports of strings", async () => {
     let lDeps = [];
 
-    extractES6("import('./dynamic').then(pModule => pModule.x);", lDeps);
+    await extractES6("import('./dynamic').then(pModule => pModule.x);", lDeps);
     expect(lDeps).to.deep.equal([
       {
         module: "./dynamic",
@@ -23,10 +30,10 @@ describe("[U] ast-extractors/extract-ES6-deps", () => {
     ]);
   });
 
-  it("dynamic imports of a template literal without placeholders yields an import", () => {
+  it("dynamic imports of a template literal without placeholders yields an import", async () => {
     let lDeps = [];
 
-    extractES6("import(`./dynamic`).then(pModule => pModule.x);", lDeps);
+    await extractES6("import(`./dynamic`).then(pModule => pModule.x);", lDeps);
     expect(lDeps).to.deep.equal([
       {
         module: "./dynamic",
@@ -37,10 +44,10 @@ describe("[U] ast-extractors/extract-ES6-deps", () => {
     ]);
   });
 
-  it("dynamic imports of a template literal with placeholders doesn't yield an import", () => {
+  it("dynamic imports of a template literal with placeholders doesn't yield an import", async () => {
     let lDeps = [];
 
-    extractES6(
+    await extractES6(
       // eslint-disable-next-line no-template-curly-in-string
       "import(`./dynamic/${enhop}`).then(pModule => pModule.x);",
       lDeps
@@ -48,13 +55,13 @@ describe("[U] ast-extractors/extract-ES6-deps", () => {
     expect(lDeps).to.deep.equal([]);
   });
 
-  it("yield a dynamic import yields an import", () => {
+  it("yield a dynamic import yields an import", async () => {
     let lDeps = [];
     const lYieldImport = `function* a() {
             yield import('http');
         }`;
 
-    extractES6(lYieldImport, lDeps);
+    await extractES6(lYieldImport, lDeps);
     expect(lDeps).to.deep.equal([
       {
         module: "http",
@@ -65,17 +72,17 @@ describe("[U] ast-extractors/extract-ES6-deps", () => {
     ]);
   });
 
-  it("dynamic imports of a number doesn't yield an import", () => {
+  it("dynamic imports of a number doesn't yield an import", async () => {
     let lDeps = [];
 
-    extractES6("import(42).then(pModule => pModule.x);", lDeps);
+    await extractES6("import(42).then(pModule => pModule.x);", lDeps);
     expect(lDeps).to.deep.equal([]);
   });
 
-  it("dynamic imports of a function call doesn't yield an import", () => {
+  it("dynamic imports of a function call doesn't yield an import", async () => {
     let lDeps = [];
 
-    extractES6(
+    await extractES6(
       `
             determineWhatToImport = () => 'bla';
             import(determineWhatToImport()).then(pModule => pModule.x);
@@ -85,7 +92,7 @@ describe("[U] ast-extractors/extract-ES6-deps", () => {
     expect(lDeps).to.deep.equal([]);
   });
 
-  it("doesn't get confused about import keywords in jsx components", () => {
+  it("doesn't get confused about import keywords in jsx components", async () => {
     let lDependencies = [];
     const lInput = `import React from 'react';
 
@@ -97,7 +104,7 @@ describe("[U] ast-extractors/extract-ES6-deps", () => {
       );
     }`;
 
-    extractES6(lInput, lDependencies, ".jsx");
+    await extractES6(lInput, lDependencies, ".jsx");
     expect(lDependencies).to.deep.equal([
       {
         module: "react",
@@ -108,7 +115,7 @@ describe("[U] ast-extractors/extract-ES6-deps", () => {
     ]);
   });
 
-  it("does a.t.m. NOT handle certain ways of jsx notation correctly", () => {
+  it("does a.t.m. NOT handle certain ways of jsx notation correctly", async () => {
     let lDependencies = [];
     const lInput = `import React from 'react';
 
@@ -127,7 +134,7 @@ export class ReplicateIssueComponent extends React.Component {
     </>
   );
 }`;
-    extractES6(lInput, lDependencies, ".jsx");
+    await extractES6(lInput, lDependencies, ".jsx");
     expect(lDependencies).to.deep.equal([
       {
         module: "react",

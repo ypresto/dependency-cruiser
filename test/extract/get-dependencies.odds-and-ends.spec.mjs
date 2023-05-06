@@ -24,21 +24,37 @@ describe("[I] extract/getDependencies - Error scenarios - ", () => {
       { bustTheCache: true },
       lOptions
     );
+    let lErrorMessage = "no error message yet";
+    let lThrown = false;
 
-    expect(() =>
-      getDependencies(
+    try {
+      await getDependencies(
         "test/extract/__mocks__/syntax-error.js",
         lOptions,
         lResolveOptions
-      )
-    ).to.not.throw(
+      );
+    } catch (pError) {
+      lErrorMessage = pError.message;
+      lThrown = true;
+    }
+    expect(lThrown).to.equal(false);
+    expect(lErrorMessage).to.not.equal(
       "Extracting dependencies ran afoul of... Unexpected token (1:3)"
     );
   });
-  it("Raises an exception on non-existing files", () => {
-    expect(() => {
-      getDependencies("non-existing-file.md", normalizeCruiseOptions({}), {});
-    }).to.throw(
+
+  it("Raises an exception on non-existing files", async () => {
+    let lErrorMessage = "none";
+    try {
+      await getDependencies(
+        "non-existing-file.md",
+        normalizeCruiseOptions({}),
+        {}
+      );
+    } catch (pError) {
+      lErrorMessage = pError.message;
+    }
+    expect(lErrorMessage).to.contain(
       "Extracting dependencies ran afoul of...\n\n  ENOENT: no such file or directory, open "
     );
   });
@@ -56,34 +72,31 @@ describe("[I] extract/getDependencies - even when require gets non-string argume
     );
   });
 
-  it("Just skips require(481)", () => {
-    expect(
-      getDependencies(
-        "./test/extract/__mocks__/cjs-require-non-strings/require-a-number.js",
-        lOptions,
-        lResolveOptions
-      ).length
-    ).to.equal(1);
+  it("Just skips require(481)", async () => {
+    const lDependencies = await getDependencies(
+      "./test/extract/__mocks__/cjs-require-non-strings/require-a-number.js",
+      lOptions,
+      lResolveOptions
+    );
+    expect(lDependencies.length).to.equal(1);
   });
 
-  it("Just skips require(a function)", () => {
-    expect(
-      getDependencies(
-        "./test/extract/__mocks__/cjs-require-non-strings/require-a-function.js",
-        lOptions,
-        lResolveOptions
-      ).length
-    ).to.equal(1);
+  it("Just skips require(a function)", async () => {
+    const lDependencies = await getDependencies(
+      "./test/extract/__mocks__/cjs-require-non-strings/require-a-function.js",
+      lOptions,
+      lResolveOptions
+    );
+    expect(lDependencies.length).to.equal(1);
   });
 
-  it("Just skips require(an iife)", () => {
-    expect(
-      getDependencies(
-        "./test/extract/__mocks__/cjs-require-non-strings/require-an-iife.js",
-        normalizeCruiseOptions({}),
-        {}
-      ).length
-    ).to.equal(1);
+  it("Just skips require(an iife)", async () => {
+    const lDependencies = await getDependencies(
+      "./test/extract/__mocks__/cjs-require-non-strings/require-an-iife.js",
+      normalizeCruiseOptions({}),
+      {}
+    );
+    expect(lDependencies.length).to.equal(1);
   });
 });
 
@@ -98,7 +111,7 @@ describe("[I] extract/getDependencies - include", () => {
     );
 
     expect(
-      getDependencies(
+      await getDependencies(
         "./test/extract/__mocks__/include/src/index.js",
         lOptions,
         lResolveOptions
@@ -114,7 +127,7 @@ describe("[I] extract/getDependencies - include", () => {
     );
 
     expect(
-      getDependencies(
+      await getDependencies(
         "./test/extract/__mocks__/include/src/index.js",
         lOptions,
         lResolveOptions
@@ -143,7 +156,7 @@ describe("[I] extract/getDependencies - include", () => {
     );
 
     expect(
-      getDependencies(
+      await getDependencies(
         "./test/extract/__mocks__/include/src/index.js",
         lOptions,
         lResolveOptions
@@ -184,7 +197,7 @@ describe("[I] extract/getDependencies - include", () => {
     );
 
     expect(
-      getDependencies(
+      await getDependencies(
         "./test/extract/__mocks__/exotic-require/index.js",
         lOptions,
         lResolveOptions
@@ -216,7 +229,7 @@ describe("[I] extract/getDependencies - include", () => {
     );
 
     expect(
-      getDependencies(
+      await getDependencies(
         "./test/extract/__mocks__/extra-extensions/not-parsed-when-in-extra-extensions.yolo",
         lOptions,
         lResolveOptions
@@ -234,7 +247,7 @@ describe("[I] extract/getDependencies - include", () => {
     );
 
     expect(
-      getDependencies(
+      await getDependencies(
         "./test/extract/__mocks__/specifyTsPreCompilationDeps/index.ts",
         lOptions,
         lResolveOptions

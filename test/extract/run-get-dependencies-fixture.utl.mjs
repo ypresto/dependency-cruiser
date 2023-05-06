@@ -21,7 +21,7 @@ export function runFixture(pFixture, pParser = "acorn") {
 
   it(`${pFixture.title} (with '${pParser}' as parser)`, async () => {
     expect(
-      getDependencies(
+      await getDependencies(
         pFixture.input.fileName,
         normalizeCruiseOptions(lOptions),
         await normalizeResolveOptions(

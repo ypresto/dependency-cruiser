@@ -57,7 +57,7 @@ const BABELEABLE_EXTENSIONS = [
  * returns the javascript wrapper if there's no wrapper module configured
  * for the extension.
  *
- * @param {string}  pExtension the extension (e.g. ".ts", ".js", ".litcoffee")
+ * @param {string} pExtension the extension (e.g. ".ts", ".js", ".litcoffee")
  * @param {any} pTranspilerOptions
  * @returns {module} the module
  */
@@ -90,11 +90,11 @@ export function getWrapper(pExtension, pTranspilerOptions) {
  *                                itself when the function could not find a
  *                                transpiler matching pExtension
  */
-export default function transpile(
+export default async function transpile(
   { extension, source, filename },
   pTranspilerOptions
 ) {
-  const lWrapper = getWrapper(extension, pTranspilerOptions);
+  const lWrapper = await getWrapper(extension, pTranspilerOptions);
 
   if (lWrapper.isAvailable()) {
     return lWrapper.transpile(source, filename, pTranspilerOptions);

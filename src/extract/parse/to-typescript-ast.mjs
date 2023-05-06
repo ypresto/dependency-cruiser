@@ -19,10 +19,10 @@ const typescript = await tryImport(
  *                                a babel config
  * @return {object} - a (typescript) AST
  */
-export function getASTFromSource(pFileRecord, pTranspileOptions) {
+export async function getASTFromSource(pFileRecord, pTranspileOptions) {
   let lSource = pFileRecord.source;
   if (pFileRecord.extension === ".vue") {
-    lSource = transpile(pFileRecord, pTranspileOptions);
+    lSource = await transpile(pFileRecord, pTranspileOptions);
   }
 
   return typescript.createSourceFile(
@@ -74,7 +74,7 @@ export default {
    * return the result from a cache
    *
    * @param {string} pFileName - the name of the file to compile
-   * @return {object} - a (typescript) AST
+   * @return {Promise<object>} - a (typescript) AST
    */
   getASTCached,
 

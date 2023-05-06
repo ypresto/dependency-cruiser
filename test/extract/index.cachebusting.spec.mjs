@@ -48,7 +48,7 @@ describe("[I] extract/index - cache busting", () => {
       "./test/extract/__mocks__/cache-busting"
     );
 
-    const lFirstResult = extract(
+    const lFirstResult = await extract(
       ["./test/extract/__mocks__/cache-busting/index.ts"],
       lOptions,
       lResolveOptions
@@ -64,7 +64,7 @@ describe("[I] extract/index - cache busting", () => {
       "./test/extract/__mocks__/cache-busting"
     );
 
-    const lSecondResult = extract(
+    const lSecondResult = await extract(
       ["./test/extract/__mocks__/cache-busting/index.ts"],
       lOptions,
       lResolveOptions
