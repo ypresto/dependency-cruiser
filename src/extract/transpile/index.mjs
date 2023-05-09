@@ -4,7 +4,7 @@ import typeScriptWrap from "./typescript-wrap.mjs";
 import liveScriptWrap from "./livescript-wrap.mjs";
 import coffeeWrap from "./coffeescript-wrap.mjs";
 import vueWrap from "./vue-template-wrap.cjs";
-import babelWrap from "./babel-wrap.mjs";
+// import gBabelWrap from "./babel-wrap.mjs";
 import svelteDingus from "./svelte-wrap.mjs";
 
 const typeScriptVanillaWrap = typeScriptWrap();
@@ -13,6 +13,7 @@ const typeScriptTsxWrap = typeScriptWrap("tsx");
 const coffeeVanillaWrap = coffeeWrap();
 const litCoffeeWrap = coffeeWrap(true);
 const svelteWrap = svelteDingus(typeScriptVanillaWrap);
+let gBabelWrap = null;
 
 export const EXTENSION2WRAPPER = {
   ".js": javaScriptWrap,
@@ -46,6 +47,14 @@ const BABELEABLE_EXTENSIONS = [
   ".d.ts",
 ];
 
+async function getBabelWrap() {
+  if (!gBabelWrap) {
+    const wrap = await import("./babel-wrap.mjs");
+    gBabelWrap = wrap.default;
+  }
+  return gBabelWrap;
+}
+
 /**
  * returns the babel wrapper if there's a babelConfig in the transpiler
  * options for babeleable extensions (javascript and typescript - currently
@@ -59,14 +68,14 @@ const BABELEABLE_EXTENSIONS = [
  *
  * @param {string} pExtension the extension (e.g. ".ts", ".js", ".litcoffee")
  * @param {any} pTranspilerOptions
- * @returns {module} the module
+ * @returns {Promise<module>} the module
  */
 export function getWrapper(pExtension, pTranspilerOptions) {
   if (
     Object.keys(pTranspilerOptions?.babelConfig ?? {}).length > 0 &&
     BABELEABLE_EXTENSIONS.includes(pExtension)
   ) {
-    return babelWrap;
+    return getBabelWrap();
   }
 
   return EXTENSION2WRAPPER[pExtension] || javaScriptWrap;
@@ -86,7 +95,7 @@ export function getWrapper(pExtension, pTranspilerOptions) {
  * @param  {{ extension:string; source:string; filename:string; }} pFileRecord      Record with source code, an extension and a filename
  * @param  {any} pTranspilerOptions (optional) object with options influencing
  *                                the underlying transpiler behavior.
- * @return {string}               the transpiled version of the file (or the file
+ * @return {Promise<string>}      the transpiled version of the file (or the file
  *                                itself when the function could not find a
  *                                transpiler matching pExtension
  */
