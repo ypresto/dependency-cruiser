@@ -201,6 +201,7 @@
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-security": "1.7.1",
     "eslint-plugin-unicorn": "^47.0.0",
+    "get-stream": "7.0.0",
     "husky": "8.0.3",
     "intercept-stdout": "0.1.2",
     "lint-staged": "13.2.2",
